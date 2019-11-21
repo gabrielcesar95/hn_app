@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'src/article.dart';
+import 'package:http/http.dart' as http;
 import 'json_parsing.dart';
 
 void main() => runApp(MyApp());
@@ -29,7 +30,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Article> _articles = [];
+  List<int> _ids = [
+    21589647,
+    21567022,
+    21585235,
+    21565624,
+    21581361,
+    21582698,
+    21572552,
+    21584847,
+  ];
+
+  Future<Article> _getArticle(int id) async {
+    final url = 'https://hacker-news.firebaseio.com/v0/item/$id.json';
+    final storyResponse = await http.get(url);
+    String jsonString;
+    if (storyResponse.statusCode == 200) {
+      return parseArticle(jsonString);
+    }
+
+    return null;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,25 +58,37 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          var fakeFuture = await Future.delayed(const Duration(
-            seconds: 1,
-          ));
-          setState(() {
-            _articles.removeAt(0);
-          });
-
-          return fakeFuture;
-        },
-        child: ListView(
-          children: _articles.map(this._buildItem).toList(),
-        ),
+      body: ListView(
+        children: _ids.map((i) {
+          return FutureBuilder<Article>(
+            future: _getArticle(i),
+            builder: (BuildContext context, AsyncSnapshot<Article> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                print(snapshot);
+                return Text(snapshot.data.title);
+              } else {
+                return Text('Not done!');
+              }
+            },
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _buildItem(Article article) {
+//  RefreshIndicator(
+//  onRefresh: () async {
+//  var fakeFuture = await Future.delayed(const Duration(
+//  seconds: 1,
+//  ));
+//  setState(() {
+//  _ids.removeAt(0);
+//  });
+//
+//  return fakeFuture;
+//},
+
+  Widget _buildItem(article) {
     return Padding(
       key: Key('${article.id}'),
       padding: const EdgeInsets.all(16.0),
