@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'src/article.dart';
+import 'json_parsing.dart';
 
 void main() => runApp(MyApp());
 
@@ -28,7 +29,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Article> _articles = articles;
+  List<Article> _articles = [];
 
   @override
   Widget build(BuildContext context) {
@@ -67,11 +68,11 @@ class _MyHomePageState extends State<MyHomePage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text('${article.commentsCount} comentários'),
+              Text('NULL comentários'),
               IconButton(
                 icon: Icon(Icons.launch),
                 onPressed: () async {
-                  final String url = 'https://${article.domain}';
+                  final String url = 'https://example.com';
                   if (await canLaunch(url)) {
                     await launch(url);
                   }
