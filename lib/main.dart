@@ -30,6 +30,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+//  Mock data:
   List<int> _ids = [
     21589647,
     21567022,
@@ -44,11 +45,10 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<Article> _getArticle(int id) async {
     final url = 'https://hacker-news.firebaseio.com/v0/item/$id.json';
     final storyResponse = await http.get(url);
-    String jsonString;
+    String jsonString = storyResponse.body;
     if (storyResponse.statusCode == 200) {
       return parseArticle(jsonString);
     }
-
     return null;
   }
 
@@ -63,11 +63,13 @@ class _MyHomePageState extends State<MyHomePage> {
           return FutureBuilder<Article>(
             future: _getArticle(i),
             builder: (BuildContext context, AsyncSnapshot<Article> snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                print(snapshot);
-                return Text(snapshot.data.title);
+              if (snapshot.connectionState == ConnectionState.done &&
+                  snapshot.hasData) {
+                return _buildItem(snapshot.data);
               } else {
-                return Text('Not done!');
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
               }
             },
           );
@@ -76,38 +78,25 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-//  RefreshIndicator(
-//  onRefresh: () async {
-//  var fakeFuture = await Future.delayed(const Duration(
-//  seconds: 1,
-//  ));
-//  setState(() {
-//  _ids.removeAt(0);
-//  });
-//
-//  return fakeFuture;
-//},
-
-  Widget _buildItem(article) {
+  Widget _buildItem(Article article) {
     return Padding(
       key: Key('${article.id}'),
       padding: const EdgeInsets.all(16.0),
       child: ExpansionTile(
         title: Text(
-          article.text,
+          article.title,
           style: TextStyle(fontSize: 20),
         ),
         children: <Widget>[
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: <Widget>[
-              Text('NULL comentários'),
+              Text(article.type),
               IconButton(
                 icon: Icon(Icons.launch),
                 onPressed: () async {
-                  final String url = 'https://example.com';
-                  if (await canLaunch(url)) {
-                    await launch(url);
+                  if (await canLaunch(article.url)) {
+                    await launch(article.url);
                   }
                 },
               )
