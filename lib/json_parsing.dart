@@ -9,9 +9,7 @@ List<int> parseTopStories(String jsonStr) {
 }
 
 Article parseArticle(String jsonStr) {
-  var a = jsonStr;
-
-  final parsed = json.decode(jsonStr);
+  final parsed = jsonDecode(jsonStr);
   Article article =
       standardSerializers.deserializeWith(Article.serializer, parsed);
   return article;
